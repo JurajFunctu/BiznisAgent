@@ -103,77 +103,57 @@ export function CRM() {
       {loading ? (
         <p className="text-center py-12 text-muted-foreground">Načítavam...</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {customers.map((customer) => (
-            <Card key={customer.id}>
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium">{customer.companyName}</p>
-                      {config.col_ico && (
-                        <p className="text-sm text-muted-foreground">IČO: {customer.ico}</p>
-                      )}
-                    </div>
-                    {config.col_segment && (
+        <div className="border rounded-lg overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-muted/50">
+                <th className="text-left p-3 font-medium">Firma</th>
+                {config.col_ico && <th className="text-left p-3 font-medium">IČO</th>}
+                {config.col_kontakt && <th className="text-left p-3 font-medium">Kontakt</th>}
+                {config.col_email && <th className="text-left p-3 font-medium">Email</th>}
+                {config.col_telefon && <th className="text-left p-3 font-medium">Telefón</th>}
+                {config.col_adresa && <th className="text-left p-3 font-medium">Adresa</th>}
+                {config.col_segment && <th className="text-left p-3 font-medium">Segment</th>}
+                {config.col_ai_score && <th className="text-left p-3 font-medium">AI Score</th>}
+                <th className="text-left p-3 font-medium">Insight</th>
+              </tr>
+            </thead>
+            <tbody>
+              {customers.map((customer) => (
+                <tr key={customer.id} className="border-b hover:bg-muted/30 transition-colors cursor-pointer">
+                  <td className="p-3 font-medium">{customer.companyName}</td>
+                  {config.col_ico && <td className="p-3 text-muted-foreground">{customer.ico}</td>}
+                  {config.col_kontakt && <td className="p-3">{customer.contactName}</td>}
+                  {config.col_email && <td className="p-3 text-muted-foreground text-xs">{customer.contactEmail}</td>}
+                  {config.col_telefon && <td className="p-3 text-muted-foreground text-xs">{customer.contactPhone}</td>}
+                  {config.col_adresa && <td className="p-3 text-muted-foreground text-xs max-w-[200px] truncate">{customer.address}</td>}
+                  {config.col_segment && (
+                    <td className="p-3">
                       <Badge variant={segmentVariants[customer.segment || 'standardny']}>
                         {customer.segment}
                       </Badge>
-                    )}
-                  </div>
-                  {config.col_kontakt && customer.contactName && (
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Kontakt:</p>
-                      <p>{customer.contactName}</p>
-                      {config.col_email && customer.contactEmail && (
-                        <p className="text-xs">{customer.contactEmail}</p>
-                      )}
-                      {config.col_telefon && customer.contactPhone && (
-                        <p className="text-xs">{customer.contactPhone}</p>
-                      )}
-                    </div>
+                    </td>
                   )}
-                  {config.col_adresa && customer.address && (
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Adresa:</p>
-                      <p className="text-xs">{customer.address}</p>
-                    </div>
-                  )}
-                  {config.col_ai_score && customer.aiScore && (
-                    <div className="flex justify-between items-center text-xs pt-2 border-t">
-                      <span className="text-muted-foreground">
-                        <span className="text-primary">Agent odhaduje:</span> Potenciál spolupráce
-                      </span>
+                  {config.col_ai_score && (
+                    <td className="p-3">
                       <span className="font-medium">{customer.aiScore}%</span>
-                    </div>
+                    </td>
                   )}
-                  
-                  {/* Smart Insights */}
-                  {customer.id % 3 === 0 && (
-                    <div className="pt-2 border-t">
-                      <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20 mb-2">
-                        📉 Agent si všimol: objednávky klesli o 35% oproti minulému kvartálu
-                      </Badge>
-                    </div>
-                  )}
-                  {customer.id % 3 === 1 && (
-                    <div className="pt-2 border-t">
-                      <Badge variant="outline" className="text-xs bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20 mb-2">
-                        ⚠️ Posledná objednávka pred 45 dňami — navrhuje kontaktovať
-                      </Badge>
-                    </div>
-                  )}
-                  {customer.id % 3 === 2 && customer.segment === 'vip' && (
-                    <div className="pt-2 border-t">
-                      <Badge variant="outline" className="text-xs bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20 mb-2">
-                        ⭐ VIP zákazník — 23 objednávok za posledný rok
-                      </Badge>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <td className="p-3 max-w-[250px]">
+                    {customer.id % 3 === 0 && (
+                      <span className="text-xs text-blue-600 dark:text-blue-400">📉 Objednávky -35%</span>
+                    )}
+                    {customer.id % 3 === 1 && (
+                      <span className="text-xs text-yellow-600 dark:text-yellow-400">⚠️ 45 dní bez obj.</span>
+                    )}
+                    {customer.id % 3 === 2 && customer.segment === 'vip' && (
+                      <span className="text-xs text-green-600 dark:text-green-400">⭐ 23 obj./rok</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 

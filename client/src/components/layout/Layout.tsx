@@ -30,7 +30,7 @@ export function Layout() {
       case 'crm':
         return <CRM />;
       case 'complaints':
-        return <Complaints />;
+        return <Documents />;
       case 'dashboard':
         return <Dashboard />;
       case 'settings':

@@ -12,9 +12,8 @@ interface SidebarProps {
 const modules = [
   { id: 'inbox', label: 'Doručené', icon: Mail },
   { id: 'documents', label: 'Doklady', icon: FileText },
-  { id: 'catalog', label: 'Katalóg', icon: Package },
+  { id: 'catalog', label: 'Katalóg produktov', icon: Package },
   { id: 'crm', label: 'Zákazníci', icon: Users },
-  { id: 'complaints', label: 'Reklamácie', icon: AlertCircle },
   { id: 'dashboard', label: 'Prehľady', icon: BarChart3 },
 ];
 

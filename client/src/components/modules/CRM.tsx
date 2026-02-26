@@ -15,6 +15,8 @@ export function CRM() {
   const [loading, setLoading] = useState(true);
   const [configOpen, setConfigOpen] = useState(false);
   const [config, setConfig] = useState<any>({});
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [customerPricing, setCustomerPricing] = useState<any>({});
 
   useEffect(() => {
     if (token) {
@@ -24,6 +26,11 @@ export function CRM() {
         .finally(() => setLoading(false));
     }
   }, [token, search]);
+
+  useEffect(() => {
+    const savedPricing = localStorage.getItem('customer-pricing');
+    if (savedPricing) setCustomerPricing(JSON.parse(savedPricing));
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem('crm-config');
@@ -120,7 +127,7 @@ export function CRM() {
             </thead>
             <tbody>
               {customers.map((customer) => (
-                <tr key={customer.id} className="border-b hover:bg-muted/30 transition-colors cursor-pointer">
+                <tr key={customer.id} onClick={() => setSelectedCustomer(customer)} className={`border-b hover:bg-muted/30 transition-colors cursor-pointer ${selectedCustomer?.id === customer.id ? 'bg-primary/10' : ''}`}>
                   <td className="p-3 font-medium">{customer.companyName}</td>
                   {config.col_ico && <td className="p-3 text-muted-foreground">{customer.ico}</td>}
                   {config.col_kontakt && <td className="p-3">{customer.contactName}</td>}
@@ -154,6 +161,123 @@ export function CRM() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Customer Detail Panel with Pricing */}
+      {selectedCustomer && (
+        <div className="mt-4 border rounded-lg p-6 bg-card">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold">{selectedCustomer.companyName}</h3>
+              <p className="text-sm text-muted-foreground">IČO: {selectedCustomer.ico} | {selectedCustomer.contactName} | {selectedCustomer.contactEmail}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant={segmentVariants[selectedCustomer.segment || 'standardny']}>{selectedCustomer.segment}</Badge>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedCustomer(null)}>✕</Button>
+            </div>
+          </div>
+
+          {/* Custom Pricing Section */}
+          <div className="border rounded-lg p-4 bg-muted/30">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-medium flex items-center gap-2">
+                💰 Individuálny cenník a zľavy
+                <Settings2 className="w-4 h-4 text-muted-foreground cursor-pointer" />
+              </h4>
+              <p className="text-xs text-muted-foreground">Agent automaticky aplikuje pri tvorbe CP a FA</p>
+            </div>
+
+            <div className="space-y-3">
+              {/* Global discount */}
+              <div className="flex items-center gap-4 p-3 border rounded-lg bg-background">
+                <span className="text-sm font-medium w-48">Paušálna zľava:</span>
+                <Input
+                  type="number"
+                  className="w-24 h-8"
+                  placeholder="0"
+                  value={customerPricing[selectedCustomer.id]?.globalDiscount || ''}
+                  onChange={(e) => {
+                    const updated = { ...customerPricing, [selectedCustomer.id]: { ...customerPricing[selectedCustomer.id], globalDiscount: e.target.value } };
+                    setCustomerPricing(updated);
+                    localStorage.setItem('customer-pricing', JSON.stringify(updated));
+                  }}
+                />
+                <span className="text-sm text-muted-foreground">%</span>
+                <span className="text-xs text-primary ml-auto">Agent aplikuje automaticky na všetky položky</span>
+              </div>
+
+              {/* Payment terms */}
+              <div className="flex items-center gap-4 p-3 border rounded-lg bg-background">
+                <span className="text-sm font-medium w-48">Splatnosť faktúr:</span>
+                <select 
+                  className="h-8 px-3 rounded border bg-background text-sm"
+                  value={customerPricing[selectedCustomer.id]?.paymentDays || '30'}
+                  onChange={(e) => {
+                    const updated = { ...customerPricing, [selectedCustomer.id]: { ...customerPricing[selectedCustomer.id], paymentDays: e.target.value } };
+                    setCustomerPricing(updated);
+                    localStorage.setItem('customer-pricing', JSON.stringify(updated));
+                  }}
+                >
+                  <option value="7">7 dní</option>
+                  <option value="14">14 dní</option>
+                  <option value="30">30 dní</option>
+                  <option value="60">60 dní</option>
+                  <option value="90">90 dní</option>
+                </select>
+              </div>
+
+              {/* Product-specific pricing */}
+              <div className="p-3 border rounded-lg bg-background">
+                <p className="text-sm font-medium mb-2">Individuálne ceny produktov:</p>
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-2">Produkt</th>
+                      <th className="text-left p-2">Katalógová cena</th>
+                      <th className="text-left p-2">Zákaznícka cena</th>
+                      <th className="text-left p-2">Zľava</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { code: 'HV-200', name: 'Hydraulický valec HV-200', catalogPrice: 890 },
+                      { code: 'T-45', name: 'Tesnenie T-45', catalogPrice: 12.50 },
+                      { code: 'MS-HV', name: 'Montážna sada MS-HV', catalogPrice: 45 },
+                      { code: 'KS-100', name: 'Kompresný systém KS-100', catalogPrice: 1250 },
+                      { code: 'FP-30', name: 'Filter priemyselný FP-30', catalogPrice: 78 },
+                    ].map(product => {
+                      const custPrice = customerPricing[selectedCustomer.id]?.products?.[product.code];
+                      const discount = custPrice ? Math.round((1 - custPrice / product.catalogPrice) * 100) : (customerPricing[selectedCustomer.id]?.globalDiscount || 0);
+                      return (
+                        <tr key={product.code} className="border-b">
+                          <td className="p-2">{product.code} — {product.name}</td>
+                          <td className="p-2">{product.catalogPrice.toFixed(2)} €</td>
+                          <td className="p-2">
+                            <Input
+                              type="number"
+                              className="w-24 h-6 text-xs"
+                              placeholder={`${(product.catalogPrice * (1 - (customerPricing[selectedCustomer.id]?.globalDiscount || 0) / 100)).toFixed(2)}`}
+                              value={custPrice || ''}
+                              onChange={(e) => {
+                                const products = { ...(customerPricing[selectedCustomer.id]?.products || {}), [product.code]: e.target.value };
+                                const updated = { ...customerPricing, [selectedCustomer.id]: { ...customerPricing[selectedCustomer.id], products } };
+                                setCustomerPricing(updated);
+                                localStorage.setItem('customer-pricing', JSON.stringify(updated));
+                              }}
+                            />
+                          </td>
+                          <td className="p-2 text-green-600 dark:text-green-400 font-medium">-{discount}%</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <p className="text-xs text-primary">💡 Agent automaticky použije individuálny cenník pri generovaní CP a FA pre tohto zákazníka.</p>
+            </div>
+          </div>
         </div>
       )}
 

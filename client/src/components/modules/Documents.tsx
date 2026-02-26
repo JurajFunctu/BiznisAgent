@@ -345,6 +345,7 @@ export function Documents() {
           <TabsTrigger value="invoices">Faktúry</TabsTrigger>
           <TabsTrigger value="orders">Objednávky</TabsTrigger>
           <TabsTrigger value="delivery">Dodacie listy</TabsTrigger>
+          <TabsTrigger value="complaints">Reklamácie</TabsTrigger>
         </TabsList>
 
         <TabsContent value="quotes">
@@ -593,6 +594,42 @@ export function Documents() {
 
         <TabsContent value="delivery">
           <p className="text-center py-8 text-muted-foreground">Žiadne dodacie listy</p>
+        </TabsContent>
+
+        <TabsContent value="complaints">
+          <div className="space-y-3">
+            {[
+              { id: 1, customer: 'TechnoStav s.r.o.', subject: 'Poškodený tovar pri preprave', status: 'v_rieseni', category: 'Poškodený tovar', date: '2026-02-24', sla: '2026-03-01', assigned: 'Ján Novák' },
+              { id: 2, customer: 'ElektroMont s.r.o.', subject: 'Chýbajúce položky v dodávke', status: 'prijata', category: 'Chýbajúci tovar', date: '2026-02-25', sla: '2026-03-04', assigned: 'Peter Horváth' },
+              { id: 3, customer: 'StavbyPlus a.s.', subject: 'Nesprávna fakturácia', status: 'vyriesena', category: 'Fakturačná chyba', date: '2026-02-20', sla: '2026-02-27', assigned: 'Jana Kováčová' },
+            ].map(complaint => (
+              <div key={complaint.id} className="border rounded-lg p-4 hover:bg-muted/30 transition-colors cursor-pointer">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <p className="font-medium">{complaint.subject}</p>
+                    <p className="text-sm text-muted-foreground">{complaint.customer}</p>
+                  </div>
+                  <Badge variant={
+                    complaint.status === 'prijata' ? 'default' :
+                    complaint.status === 'v_rieseni' ? 'secondary' : 'outline'
+                  }>
+                    {complaint.status === 'prijata' ? 'Prijatá' :
+                     complaint.status === 'v_rieseni' ? 'V riešení' : 'Vyriešená'}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>📅 {complaint.date}</span>
+                  <span>🏷️ {complaint.category}</span>
+                  <span>👤 {complaint.assigned}</span>
+                  <span>⏱️ SLA: {complaint.sla}</span>
+                </div>
+                <div className="mt-2 text-xs text-primary">
+                  Agent navrhuje: {complaint.status === 'prijata' ? 'Kontaktovať zákazníka a overiť detaily' : 
+                    complaint.status === 'v_rieseni' ? 'Pripraviť náhradnú zásielku' : 'Uzavrieť prípad a odoslať potvrdenie'}
+                </div>
+              </div>
+            ))}
+          </div>
         </TabsContent>
       </Tabs>
 

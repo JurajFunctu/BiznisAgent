@@ -547,7 +547,7 @@ Obchodné oddelenie`
                 
                 <div className="pt-4 border-t space-y-2">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium">Navrhované akcie:</p>
+                    <p className="text-sm font-medium">Agent navrhuje:</p>
                     <Button
                       variant="ghost"
                       size="sm"

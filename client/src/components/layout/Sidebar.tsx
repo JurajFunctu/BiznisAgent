@@ -97,7 +97,7 @@ export function Sidebar({ activeModule, setActiveModule }: SidebarProps) {
           Odhlásiť sa
         </Button>
         <div className="pt-2 text-center text-xs text-muted-foreground">
-          ⌨️ Skratky: N=nový, C=CP, F=FA, /=hľadať
+          ⌨️ Skratky: N=nový, C=CP, F=FA, /=hľadať | v3.0.2
         </div>
       </div>
     </>
